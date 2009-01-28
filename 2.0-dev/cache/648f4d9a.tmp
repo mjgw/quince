@@ -1,0 +1,1 @@
+a:2:{i:0;a:3:{s:3:"url";s:14:"/action/module";s:6:"action";s:11:"otherMethod";s:6:"module";s:4:"test";}i:1;a:3:{s:3:"url";s:33:"/this_is/dynamic2/:test/:argument";s:6:"action";s:11:"otherMethod";s:6:"module";s:4:"test";}}

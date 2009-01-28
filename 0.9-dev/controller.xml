@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<controller xmlns="http://users.visudo.com/eddie/PHP-Controller" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://users.visudo.com/eddie/PHP-Controller controller.xsd">
+  
+  <modules>modules/:modules_alt/</modules>
+  <catch-all>false</catch-all>
+	<domain-path>quince/Checkin/0.8/</domain-path>
+	
+  <module>
+    <name>test</name>
+    <class>Test</class>
+    <template>Test</template>
+    <default-method>testMethod</default-method>
+    <form-forward method-name="addPageAction" method-type="POST">pages</form-forward>
+    <alias match="module/action">searchDomain</alias>
+  </module>
+  
+  <module>
+    <name>website</name>
+    <class>CmsFrontEnd</class>
+    <template>Website</template>
+    <label>CMS Output Viewer</label>
+    <default-method>renderPageFromUrl</default-method>
+    <default-page>1</default-page>
+    <alias match="search">searchDomain</alias>
+    <alias match="tags/$tag.html">renderPageFromId?tag=true&amp;tag_name=$tag</alias>
+    <alias match="tags/$tag/feed">renderSiteTagSimpleRssFeed?tag_name=$tag</alias>
+    <alias match="download/$url.$suffix">downloadAsset?url=$url&amp;suffix=$suffix</alias>
+  </module>
+
+</controller>

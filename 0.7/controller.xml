@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<controller xmlns="http://users.visudo.com/eddie/PHP-Controller" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://users.visudo.com/eddie/PHP-Controller controller.xsd">
+  <version>0.7</version>
+  <modules>Modules/</modules>
+	<domain-path>PHP-Controller/</domain-path>
+  <catch-all>false</catch-all>
+  <authentication>
+    <name>authentication</name>
+    <class>Authentication</class>
+    <template>Authentication</template>
+    <login-forward method-name="login">administrator</login-forward>
+    <logout-forward method-name="logout">administrator</logout-forward>
+  </authentication>
+
+	
+  <module>
+    <name>forum</name>
+    <class>Forum</class>
+    <template>Forum</template>
+    <default-page>true</default-page>
+    <default-method>messages</default-method>		
+		<!-- possible options for method-access are "allow" or "deny" and this determines
+		what to do with methods mentioned below. NOTE: allow/deny are exclusive, 
+		so if you mention methods to allow, all other methods fail-->
+    <method-access></method-access> 
+    <method-name>messages</method-name>		
+    <form-forward method-name="addMessageAction" method-type="POST">forum/messages</form-forward>
+    <alias match="add">addMessage</alias>
+    <enabled>true</enabled>
+  </module>
+
+
+  <module>
+    <name>administrator</name>
+    <class>Administrator</class>
+    <template>Administrator</template>
+    <default-method>users</default-method>
+    <method-access></method-access>
+    <method-name>users</method-name>
+    <form-forward method-name="doAddUser" method-type="POST">administrator</form-forward>
+    <alias match="admin/id/$id">User?id=$id</alias>
+    <alias match="adminaccount">User?id=1</alias>
+    <alias match="admin/$name/$fish/$id">User?name=$name&amp;fish=$fish&amp;id=$id</alias>
+    <alias match="add/new/user">addUser?firstname=eddie tejeda</alias>
+    <enabled>true</enabled>
+    <role>admin</role>
+  </module>
+
+</controller>

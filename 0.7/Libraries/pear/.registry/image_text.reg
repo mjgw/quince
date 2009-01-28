@@ -1,0 +1,23 @@
+a:17:{s:8:"provides";a:0:{}s:8:"filelist";a:4:{s:19:"example/example.php";a:3:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:0:"";s:12:"installed_as";s:58:"/usr/local/php5/lib/php/doc/Image_Text/example/example.php";}s:14:"Image/Text.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:0:"";s:12:"installed_as";s:38:"/usr/local/php5/lib/php/Image/Text.php";}s:15:"make_docbook.sh";a:3:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:0:"";s:12:"installed_as";s:54:"/usr/local/php5/lib/php/doc/Image_Text/make_docbook.sh";}s:15:"make_dochtml.sh";a:3:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:0:"";s:12:"installed_as";s:54:"/usr/local/php5/lib/php/doc/Image_Text/make_dochtml.sh";}}s:10:"xsdversion";s:3:"1.0";s:7:"package";s:10:"Image_Text";s:7:"summary";s:50:"Image_Text - Advanced text maipulations in images.";s:11:"description";s:395:"Image_Text provides a comfortable interface to text manipulations in GD
+images. Beside common Freetype2 functionality it offers to handle texts
+in a graphic- or office-tool like way. For example it allows alignment of
+texts inside a text box, rotation (around the top left corner of a text
+box or it's center point) and the automatic measurizement of the optimal
+font size for a given text box.
+";s:11:"maintainers";a:1:{i:0;a:4:{s:6:"handle";s:4:"toby";s:4:"name";s:14:"Tobias Schlitt";s:5:"email";s:12:"toby@php.net";s:4:"role";s:4:"lead";}}s:7:"version";s:10:"0.5.2beta2";s:12:"release_date";s:10:"2004-09-23";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:50:"* Fixed bug 2265: Init a heigth without a canvas.
+";s:12:"release_deps";a:1:{i:1;a:4:{s:4:"type";s:3:"ext";s:3:"rel";s:3:"has";s:8:"optional";s:2:"no";s:4:"name";s:2:"gd";}}s:9:"changelog";a:4:{i:0;a:5:{s:7:"version";s:5:"0.5.1";s:12:"release_date";s:10:"2004-04-14";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:59:"* Fixed bug #1207 supporting old versions - fix included.
+
+";}i:1;a:5:{s:7:"version";s:9:"0.5.1beta";s:12:"release_date";s:10:"2004-07-11";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:515:"* Fixed bug #1207 supporting old versions - fix included.
+* Updated default color array regarding to bug #1203: mega bug summary / with some wishes.
+* Added more docs for "font_path" and "font_file" regarding bug #1203: mega bug summary / with some wishes.
+* Moved options docs to options array.
+* Added simple example to the top.
+* Fixed save() method accoriding to bug #1203: mega bug summary / with some wishes.
+* Added construct() method according to bug #1203 [Opn->Asn]: mega bug summary / with some wishes.
+
+";}i:2;a:5:{s:7:"version";s:10:"0.5.2beta1";s:12:"release_date";s:10:"2004-09-01";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:70:"* Fixed bug #2182: problems displaying "0"
+* Fixed bug #2161: Notice
+
+";}i:3;a:5:{s:7:"version";s:10:"0.5.2beta2";s:12:"release_date";s:10:"2004-09-23";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:51:"* Fixed bug 2265: Init a heigth without a canvas.
+
+";}}s:12:"_lastversion";N;s:7:"dirtree";a:3:{s:46:"/usr/local/php5/lib/php/doc/Image_Text/example";b:1;s:29:"/usr/local/php5/lib/php/Image";b:1;s:38:"/usr/local/php5/lib/php/doc/Image_Text";b:1;}s:13:"_lastmodified";i:1144714463;}

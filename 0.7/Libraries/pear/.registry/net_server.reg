@@ -1,0 +1,39 @@
+a:17:{s:8:"provides";a:0:{}s:8:"filelist";a:7:{s:13:"docs/todo.txt";a:3:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:3:"Net";s:12:"installed_as";s:52:"/usr/local/php5/lib/php/doc/Net_Server/docs/todo.txt";}s:21:"examples/talkback.php";a:3:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:3:"Net";s:12:"installed_as";s:60:"/usr/local/php5/lib/php/doc/Net_Server/examples/talkback.php";}s:17:"Server/Driver.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:3:"Net";s:12:"installed_as";s:45:"/usr/local/php5/lib/php/Net/Server/Driver.php";}s:18:"Server/Handler.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:3:"Net";s:12:"installed_as";s:46:"/usr/local/php5/lib/php/Net/Server/Handler.php";}s:22:"Server/Driver/Fork.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:3:"Net";s:12:"installed_as";s:50:"/usr/local/php5/lib/php/Net/Server/Driver/Fork.php";}s:28:"Server/Driver/Sequential.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:3:"Net";s:12:"installed_as";s:56:"/usr/local/php5/lib/php/Net/Server/Driver/Sequential.php";}s:10:"Server.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:3:"Net";s:12:"installed_as";s:38:"/usr/local/php5/lib/php/Net/Server.php";}}s:10:"xsdversion";s:3:"1.0";s:7:"package";s:10:"Net_Server";s:7:"summary";s:20:"Generic server class";s:11:"description";s:79:"Generic server class based on ext/sockets, used to develop any kind of server.
+";s:11:"maintainers";a:2:{i:0;a:4:{s:6:"handle";s:5:"schst";s:4:"name";s:15:"Stephan Schmidt";s:5:"email";s:19:"schst@php-tools.net";s:4:"role";s:4:"lead";}i:1;a:4:{s:6:"handle";s:11:"lucamariano";s:4:"name";s:12:"Luca Mariano";s:5:"email";s:21:"luca.mariano@email.it";s:4:"role";s:4:"lead";}}s:7:"version";s:6:"0.12.0";s:12:"release_date";s:10:"2004-08-21";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:237:"- fixed Bug #2092 (typo in variable name)
+- fixed bug #2157 (socket_shutdown not called)
+- fixes bug #1945 (removed some variables that have been left over from Net_Server_Driver_Sequential)
+- fixed Request #1946 (improved debug output)
+";s:12:"release_deps";a:4:{i:1;a:4:{s:4:"type";s:3:"php";s:3:"rel";s:2:"ge";s:7:"version";s:5:"4.2.0";s:8:"optional";s:2:"no";}i:2;a:4:{s:4:"type";s:3:"pkg";s:3:"rel";s:3:"has";s:8:"optional";s:2:"no";s:4:"name";s:4:"PEAR";}i:3;a:4:{s:4:"type";s:3:"ext";s:3:"rel";s:3:"has";s:8:"optional";s:2:"no";s:4:"name";s:7:"sockets";}i:4;a:4:{s:4:"type";s:3:"ext";s:3:"rel";s:3:"has";s:8:"optional";s:3:"yes";s:4:"name";s:5:"pcntl";}}s:9:"changelog";a:9:{i:0;a:4:{s:7:"version";s:3:"0.9";s:12:"release_date";s:10:"2002-07-21";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:39:"pearified version of patServer v1.0.1
+
+";}i:1;a:5:{s:7:"version";s:4:"0.10";s:12:"release_date";s:10:"2003-10-31";s:15:"release_license";s:3:"PHP";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:181:"BC breakage release:
+Net_Server is now working with drivers
+and callback handlers inseatd of extending
+a base class
+Driver based on pcntl is now included that
+forks new processes.
+
+";}i:2;a:5:{s:7:"version";s:4:"0.11";s:12:"release_date";s:10:"2004-01-02";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:151:"Added auto-detect for clients that use no readEndCharacter
+Restructuring:
+* added driver base class
+* moved code from Net_Server to Net_Server_Driver
+
+";}i:3;a:5:{s:7:"version";s:6:"0.11.2";s:12:"release_date";s:10:"2004-07-02";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:137:"- fixed bug #1244 (check for required extensions),
+- fixed bug #1429 (fails on reading a 0 character),
+- fixed some coding style issues
+
+";}i:4;a:5:{s:7:"version";s:9:"0.11.2pl1";s:12:"release_date";s:10:"2004-07-02";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:52:"- fixed bug with autodetection of connection abort
+
+";}i:5;a:5:{s:7:"version";s:6:"0.11.3";s:12:"release_date";s:10:"2004-07-02";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:52:"- fixed bug with autodetection of connection abort
+
+";}i:6;a:5:{s:7:"version";s:6:"0.11.4";s:12:"release_date";s:10:"2004-07-17";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:104:"- fixed bug #1890 (Server.php needs PEAR.php)
+- fixed notices in Fork.php
+- added missing dependencies
+
+";}i:7;a:5:{s:7:"version";s:6:"0.11.5";s:12:"release_date";s:10:"2004-07-25";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:49:"- fixed bug #1972 (script runs in endless loop)
+
+";}i:8;a:5:{s:7:"version";s:6:"0.12.0";s:12:"release_date";s:10:"2004-08-21";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:5:"alpha";s:13:"release_notes";s:238:"- fixed Bug #2092 (typo in variable name)
+- fixed bug #2157 (socket_shutdown not called)
+- fixes bug #1945 (removed some variables that have been left over from Net_Server_Driver_Sequential)
+- fixed Request #1946 (improved debug output)
+
+";}}s:12:"_lastversion";N;s:7:"dirtree";a:5:{s:43:"/usr/local/php5/lib/php/doc/Net_Server/docs";b:1;s:47:"/usr/local/php5/lib/php/doc/Net_Server/examples";b:1;s:34:"/usr/local/php5/lib/php/Net/Server";b:1;s:27:"/usr/local/php5/lib/php/Net";b:1;s:41:"/usr/local/php5/lib/php/Net/Server/Driver";b:1;}s:13:"_lastmodified";i:1144714460;}

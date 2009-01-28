@@ -1,0 +1,21 @@
+Version 0.7
+Current:
+* Autoconfigure URL path
+* Rename pages to modules
+* Test order of aliases and static paths
+* Method Name prints done "(none defined)" during authentication form
+* Enabled catch-all tag
+* Enabled method-access tag
+* Enabled method-name tag
+* Validation on controller when loaded by constructor to avoid unsightly errors
+* New Requirement: require_once 'XML/Serializer.php
+* The URL is now case-insensitive (this is now mandatory to fix a bug where sections were not found);
+
+
+* Do validation on controller when loaded by constructor to avoid unsightly errors
+* PHP Errors should be used internally and never be returned outside of controller
+* Test issues which might arise from the new page alias system
+* Test/Debug/Resolve possible issues that might arise with precedence and aliases
+* Ensure that default pages can be designed with catch-all-arguements in mind
+require_once 'XML/Serializer.php'; 
+lower case

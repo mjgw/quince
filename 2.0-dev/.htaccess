@@ -1,0 +1,3 @@
+AddType application/x-httpd-php *
+RewriteEngine on
+RewriteRule !\.(swf|gif|css)$ index.php

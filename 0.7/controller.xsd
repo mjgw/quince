@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://vault.visudo.com/quince" xmlns="http://vault.visudo.com/quince" elementFormDefault="qualified">
+  <xs:element name="controller">
+    <xs:complexType>
+      <!-- The version of this document -->
+      <xs:element name="version" type="xs:decimal"/>
+      <!-- *DEPRECATED* domain will not be in 1.0 release -->
+      <xs:element name="domain" type="xs:string"/>      
+      <!-- *DEPRECATED* domain will not be in 1.0 release -->
+      <xs:element name="application-path" type="xs:string"/>      
+      <!-- relative path to application in URL, (if not root) -->
+      <xs:element name="domain-path" type="xs:string"/>      			
+      <!-- the relative file system path to modules (Pages/ or /var/www/bugtracker/Classes/) are held -->
+      <xs:element name="modules" type="xs:string"/>
+
+      <xs:sequence>
+        <!-- when a user encounters a page with a role that they are not set
+        to see then this form will appear and give user opporitunity to
+        authenticate him/herself. This is the class that will be loaded when this
+        happens -->
+        <xs:element name="authentication" maxOccurs="1">
+          <xs:complexType>
+            <!-- this will be the name in the URI to login form -->
+            <xs:element name="name" type="xs:string" />
+            <!-- this will be the class name with authentication form -->
+            <xs:element name="class" type="xs:string" />
+            <!-- the template, if used, that holds the login form -->
+            <xs:element name="template" type="xs:string" />
+            <!-- this will be the page user will be forwared to after login is successful-->
+            <xs:element name="login-forward" type="xs:string">
+              <xs:complexType>
+                <!-- the name in the URI of the action that does actual logout -->
+                <xs:attribute name="method-name" type="xs:string"/>
+              </xs:complexType>
+            </xs:element>
+            <!-- this will be the page user will be forwared to after logout -->
+            <xs:element name="logout-forward" type="xs:string">
+              <xs:complexType>
+                <!-- the name in the url of the action that does the actual logout -->
+                <xs:attribute name="method-name" type="xs:string"/>
+              </xs:complexType>
+            </xs:element>            
+          </xs:complexType>
+        </xs:element>
+
+
+        <!-- each page is actually a class in the pages path (/var/www/bugtracker/Pages/Users.class.php-->
+        <xs:element name="module" minOccurs="1">
+          <xs:complexType>
+            <!-- the base name that will be used to access by URI -->
+            <xs:element name="name" type="xs:string" maxOccurs="1"/>
+            <!-- the class that will be loaded with page -->
+            <xs:element name="class" type="xs:string" maxOccurs="1"/>
+            <!-- the template name that will be used for this page -->
+            <xs:element name="template" type="xs:string" />
+            <!-- this is only defined in only ONE page. if no arguements are passed in URL, the this page is laoded -->
+            <xs:element name="default-page" type="xs:boolean" mixOccurs="1" maxOccurs="1" />
+            <!-- this can be "strict" or "loose" to enforce ACL of method names -->
+            <xs:element name="method-access" type="xs:string" maxOccurs="1" />
+            <!-- the method inside the class that will be call if no other is defined -->
+            <xs:element name="default-method" type="xs:string" />
+            <!-- a method in class that is allowed to be accessed if method-access is defined to strict-->
+            <xs:element name="method-name" type="xs:string" />
+            <!-- for every form in page we must define what happens after form is submited -->
+            <xs:element name="form-forward" type="xs:string">
+              <xs:complexType>
+                <!-- the name in the url that performs the form action -->
+                <xs:attribute name="method-name" type="xs:string"/>
+                <!-- this is required and can be either GET or POST -->
+                <xs:attribute name="method-type" type="xs:string"/>
+              </xs:complexType>
+            </xs:element>
+            <!-- the pattern in REQUEST URI which maybe have variables used in value -->
+            <xs:element name="alias" type="xs:string">
+              <xs:complexType>
+                <xs:attribute name="match" type="xs:string"/>
+              </xs:complexType>
+            </xs:element>
+            <!-- the name of the role of the user set by $_SESSION['role'] this must
+            be set during authentication -->
+            <xs:element name="role" type="xs:string" />
+            <!-- enable or disable the module. if disabled, page will not be found -->
+            <xs:element name="enabled" type="xs:boolean" />
+          </xs:complexType>
+        </xs:element>
+
+        <!-- *DEPRECATED* aliases will need inside page tags in 1.0 release -->
+        <xs:element name="alias">
+          <xs:complexType>
+            <!-- this is the name matched in the URI request -->
+            <xs:element name="name" type="xs:string" />
+            <!-- relative path to the classname/method?argument=1 -->
+            <xs:element name="page" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+        
+      </xs:sequence>      
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

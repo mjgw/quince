@@ -1,0 +1,19 @@
+quince:
+  request_class: QuinceRequest
+# This can be 'throw', 'return', 'die'. Default is 'throw'
+  exception_handling: throw
+  default_module: test
+  cache_dir: cache/
+  use_checking: true
+  use_namespaces: true
+  modules:
+    config: quince.yml
+    storage:
+      - modules/
+      - modules_alt/
+  namespaces:
+    html:
+      prefix: 
+      mode: NS_NONE
+      meta:
+        is_vsc: true

@@ -1,0 +1,11 @@
+module:
+  class: Test
+  shortname: test
+  code_id: com.smartest.Pages
+  longname: Test Module for Quince 2.0
+  default_action: testMethod
+  aliases:
+    - {url: /action/module, action: otherMethod}
+    - {url: /this_is/dynamic2/:test/:argument, action: otherMethod}
+  metas:
+    system: true

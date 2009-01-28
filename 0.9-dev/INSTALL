@@ -1,0 +1,5 @@
+INSTALL
+
+* This class is dependent on Pear XML Unserializer. This is bundled in Libraries/, but the include path needs to be set to include the Libraries/ directory (which it is in the supplied .htaccess)
+* If using disk-caching, the cache directory must be writable by the web server.
+* Sessions are required to be active, but Quince.class.php doesn't start the session (to give you the flexibility of choosing when you want to start the session)

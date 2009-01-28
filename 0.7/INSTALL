@@ -1,0 +1,25 @@
+INSTALL
+
+Installation is very simple.
+
+1) Download package from http://www.quincecontroller.org/download.html
+2) Extract into web accessible directory
+3) That should be all
+
+
+POSSIBLE PROBLEMS:
+1) Make sure that the directory you've installed package is writable by webserver
+2) If yo're using templates, make sure that Libraries/Smarty/templates_c is writeable
+3) Check that your server allows htaccess to override settings with htaccess file
+
+DocumentRoot "/path/to/web"
+
+<Directory />
+    Options FollowSymLinks All
+    AllowOverride All
+</Directory>
+
+
+
+
+

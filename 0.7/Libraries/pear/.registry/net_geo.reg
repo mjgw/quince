@@ -1,0 +1,24 @@
+a:18:{s:8:"provides";a:7:{s:13:"class;Net_Geo";a:3:{s:4:"type";s:5:"class";s:4:"name";s:7:"Net_Geo";s:8:"explicit";b:1;}s:28:"function;Net_Geo::setService";a:3:{s:4:"type";s:8:"function";s:4:"name";s:19:"Net_Geo::setService";s:8:"explicit";b:1;}s:27:"function;Net_Geo::getRecord";a:3:{s:4:"type";s:8:"function";s:4:"name";s:18:"Net_Geo::getRecord";s:8:"explicit";b:1;}s:28:"function;Net_Geo::getCountry";a:3:{s:4:"type";s:8:"function";s:4:"name";s:19:"Net_Geo::getCountry";s:8:"explicit";b:1;}s:28:"function;Net_Geo::getLatLong";a:3:{s:4:"type";s:8:"function";s:4:"name";s:19:"Net_Geo::getLatLong";s:8:"explicit";b:1;}s:24:"function;Net_Geo::getLat";a:3:{s:4:"type";s:8:"function";s:4:"name";s:15:"Net_Geo::getLat";s:8:"explicit";b:1;}s:25:"function;Net_Geo::getLong";a:3:{s:4:"type";s:8:"function";s:4:"name";s:16:"Net_Geo::getLong";s:8:"explicit";b:1;}}s:8:"filelist";a:2:{s:7:"Geo.php";a:4:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:3:"Net";s:6:"md5sum";s:32:"42e76cccd938764c7024e9ee3c7b3467";s:12:"installed_as";s:35:"/usr/local/php5/lib/php/Net/Geo.php";}s:6:"README";a:4:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:3:"Net";s:6:"md5sum";s:32:"0e9147a9dedd3704430c3eb671198db0";s:12:"installed_as";s:42:"/usr/local/php5/lib/php/doc/Net_Geo/README";}}s:10:"xsdversion";s:3:"1.0";s:15:"packagerversion";s:5:"1.4.6";s:7:"package";s:7:"Net_Geo";s:7:"summary";s:48:"Geographical locations based on Internet address";s:11:"description";s:148:"Obtains geographical information based on IP number, domain name,
+or AS number. Makes use of CAIDA Net_Geo lookup, HostIP or
+localizer extension.
+ 
+";s:11:"maintainers";a:2:{i:0;a:4:{s:6:"handle";s:7:"ehlersd";s:4:"name";s:13:"Darren Ehlers";s:5:"email";s:27:"darren@ehlersconsulting.net";s:4:"role";s:4:"lead";}i:1;a:4:{s:6:"handle";s:6:"graeme";s:4:"name";s:14:"Graeme Merrall";s:5:"email";s:20:"graeme@inetix.com.au";s:4:"role";s:4:"lead";}}s:7:"version";s:5:"1.0.4";s:12:"release_date";s:10:"2006-03-29";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:85:"Corrected wrong include path for XML_Serializer package (used for hostip service)
+  
+";s:12:"release_deps";a:2:{i:1;a:3:{s:4:"type";s:3:"pkg";s:3:"rel";s:3:"has";s:4:"name";s:5:"Cache";}i:2;a:3:{s:4:"type";s:3:"pkg";s:3:"rel";s:3:"has";s:4:"name";s:14:"XML_Serializer";}}s:9:"changelog";a:5:{i:0;a:5:{s:7:"version";s:5:"1.0.4";s:12:"release_date";s:10:"2006-03-29";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:87:"Corrected wrong include path for XML_Serializer package (used for hostip service)
+    
+";}i:1;a:5:{s:7:"version";s:5:"1.0.3";s:12:"release_date";s:10:"2006-03-28";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:85:"Removed the PHP5 dependency, and added the Package "XML_Serializer" dependency.
+    
+";}i:2;a:5:{s:7:"version";s:5:"1.0.2";s:12:"release_date";s:10:"2006-03-19";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:254:"The NetGEO database is extremely old with no plans to update
+        or further support it.  It has been updated to add in support for
+        the HostIP service, as well as a few bug fixes (related to the use
+        of the alternate_url options).
+    
+";}i:3;a:5:{s:7:"version";s:5:"1.0.1";s:12:"release_date";s:10:"2005-10-25";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:168:"* Added use of pear Cache::Function
+        * Added additional use of localizer API (see READ me for URL)
+        * Bug #10 fixed
+        * Typo in example fixed.
+    
+";}i:4;a:5:{s:7:"version";s:3:"1.0";s:12:"release_date";s:10:"2002-05-05";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:111:"* Added use of pear Cache::Function
+        * Added additional use of localizer API (see READ me for URL)
+    
+";}}s:12:"_lastversion";N;s:7:"dirtree";a:2:{s:27:"/usr/local/php5/lib/php/Net";b:1;s:35:"/usr/local/php5/lib/php/doc/Net_Geo";b:1;}s:13:"_lastmodified";i:1144714031;}

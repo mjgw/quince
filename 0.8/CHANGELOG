@@ -1,0 +1,36 @@
+* fixed bug: where default method was not called when requested method doesn't exist.
+* fixed bug: where information such as method and class were not available until performAction() had been called.
+* fixed bug: where only the first request variable would be passed to the request on form-forards
+
+* renamed: "pages" to "modules"
+* renamed: Controller.class.php to Quince.class.php
+* renamed: Quince::getSectionName() to Quince::getModuleName()
+* renamed: Quince::getDomainName() to Quince::getDomain()
+* renamed: Quince::$sectionName to Quince::$moduleName
+* renamed: Quince::$domainName to Quince::$domain
+* renamed: application-path to domain-path
+
+* deprecated: Quince::getAlias()
+* deprecated: Quince::getSectionName()
+* deprecated: Quince::getDomainName()
+* deprecated: Quince::getNavigationState() - Quince is for application structuring, not content management.
+* deprecated: Quince::getMetaData() - see above.
+* deprecated: Quince::$sectionName
+* deprecated: Quince::$domainName
+
+* added: modules can now have their own directories and sub-xml files for adding additional aliases, form-forwards, and other info. Quince::getModuleDirectory()
+* added: multiple module directories, so you can store modules in more than one location if you need.
+* added: URL namespaces, eg /namespace:module/method?var=value and Quince::getNameSpace()
+* added: caching of all xml files and automatic re-loading every time they change.
+* added: URL optional dot syntax (/module.method?var=value)
+* added: predictable alias behavior - the first matching alias will be loaded, so most general aliases should come last.
+* added: beginnings of support for ajax modules - <ajax>true</ajax>, getAjaxModules()
+* added: super-descriptive debugging and logging with Quince::getDebugContent()
+* added: Quince::dispatch() - instantiate the controller without proceeding further, manipulate settings or take care of other business, and then start the controller with dispatch()
+* added: Quince::getRequest() returns the current request, starting from the end of the domain-path.
+* added: Quince::getModuleNames() returns an array of the names of the loaded modules.
+* added: Quince::getModules() returns an array of the loaded modules.
+* added: Quince::getIsAlias() - tells whether or not the current request is being matched to an alias or not.
+
+* removed: user authentication, access control and roles, Quince::isPrivilegedUser(), etc. Quince is for overall application structure. 
+(This never worked well or predictably enough to use, and so didn't survive the re-write. can be added again if desired though I think it's not necessary)

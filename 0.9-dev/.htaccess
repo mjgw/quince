@@ -1,0 +1,5 @@
+php_value include_path ".:Libraries/pear/"
+
+AddType application/x-httpd-php *
+RewriteEngine on
+RewriteRule !\.(swf|gif|css)$ index.php

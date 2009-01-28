@@ -1,0 +1,29 @@
+a:17:{s:8:"provides";a:0:{}s:8:"filelist";a:3:{s:10:"Client.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:4:"HTTP";s:12:"installed_as";s:39:"/usr/local/php5/lib/php/HTTP/Client.php";}s:24:"Client/CookieManager.php";a:3:{s:4:"role";s:3:"php";s:14:"baseinstalldir";s:4:"HTTP";s:12:"installed_as";s:53:"/usr/local/php5/lib/php/HTTP/Client/CookieManager.php";}s:25:"examples/link-checker.php";a:3:{s:4:"role";s:3:"doc";s:14:"baseinstalldir";s:4:"HTTP";s:12:"installed_as";s:65:"/usr/local/php5/lib/php/doc/HTTP_Client/examples/link-checker.php";}}s:10:"xsdversion";s:3:"1.0";s:7:"package";s:11:"HTTP_Client";s:7:"summary";s:68:"Easy way to perform multiple HTTP requests and process their results";s:11:"description";s:398:"The HTTP_Client class wraps around HTTP_Request and provides a higher level interface 
+for performing multiple HTTP requests.
+
+Features:
+* Manages cookies and referrers between requests
+* Handles HTTP redirection
+* Has methods to set default headers and request parameters
+* Implements the Subject-Observer design pattern: the base class sends 
+events to listeners that do the response processing.
+";s:11:"maintainers";a:1:{i:0;a:4:{s:6:"handle";s:3:"avb";s:4:"name";s:13:"Alexey Borzov";s:5:"email";s:11:"avb@php.net";s:4:"role";s:4:"lead";}}s:7:"version";s:5:"1.0.0";s:12:"release_date";s:10:"2004-06-11";s:15:"release_license";s:11:"PHP License";s:13:"release_state";s:6:"stable";s:13:"release_notes";s:114:"Since no problems were discovered with release 1.0.0beta1, the same code
+is now re-released with "stable" status.
+";s:12:"release_deps";a:1:{i:1;a:4:{s:4:"type";s:3:"pkg";s:3:"rel";s:2:"ge";s:7:"version";s:3:"1.2";s:4:"name";s:12:"HTTP_Request";}}s:9:"changelog";a:3:{i:0;a:4:{s:7:"version";s:10:"1.0.0beta1";s:12:"release_date";s:10:"2004-04-30";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:230:"* REMOVED deprecated HTTP_Client_Listener
+* Applied patch from #1151, cookies with empty values are now deleted
+* Added method enableHistory() allowing to enable/disable saving of history, 
+  suggested by Matthew Feinberg
+      
+
+";}i:1;a:4:{s:7:"version";s:3:"0.2";s:12:"release_date";s:10:"2004-01-18";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:352:"* Depend on most recent version of HTTP_Request
+  - HTTP_Client_Listener is deprecated in favor of HTTP_Request_Listener
+  - Added possibilty to attach Listeners to created HTTP_Request objects
+  - Added support for file uploads in post() method
+* Better handling of secure cookies (thanks to Denis Malinovsky)
+* Added setMaxRedirects() method
+      
+
+";}i:2;a:4:{s:7:"version";s:3:"0.1";s:12:"release_date";s:10:"2003-06-05";s:13:"release_state";s:4:"beta";s:13:"release_notes";s:29:"Initial PEAR release
+      
+
+";}}s:12:"_lastversion";N;s:7:"dirtree";a:3:{s:28:"/usr/local/php5/lib/php/HTTP";b:1;s:35:"/usr/local/php5/lib/php/HTTP/Client";b:1;s:48:"/usr/local/php5/lib/php/doc/HTTP_Client/examples";b:1;}s:13:"_lastmodified";i:1144714462;}
