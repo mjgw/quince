@@ -829,7 +829,7 @@ class Quince{
 						$available_methods = get_class_methods($this->className);
 					
 						if(in_array(@$method, $available_methods)){
-							$this->_log("The method has been set as $method().");
+							$this->_log("The method \"$method()\" has been found and will be called.");
 							$this->methodName = $method;
 						}else{
 							if(in_array($default_method, $available_methods)){
