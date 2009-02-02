@@ -334,8 +334,18 @@ class Quince{
 			
 		}
 		
+		// MultiViews support: look for URLS like index.php/module/action
+		$fc_filename = basename($_SERVER['SCRIPT_FILENAME']);
+		$fc_filename_len = strlen($fc_filename);
+		if(substr($request, 0, $fc_filename_len+1) == $fc_filename.'/'){
+		    $this->_log("MultiViews are in use instead of URL rewriting.");
+		    $this->domainPath .= $fc_filename.'/';
+		    $request = substr($request, $fc_filename_len+1);
+		}
+		
 		if($request){
 			$this->_log("The URL request was detected as \"$request\".");
+			$this->_log("The URL domain path was set to \"{$this->domainPath}\".");
 		}else{
 			$this->_log("The URL request is empty. This is the top level of the site or application.");
 		}
@@ -345,8 +355,8 @@ class Quince{
 	}
 	
 	function setDomain(){
-		$protocol = isset($_SERVER['HTTPS']) ? "https://" : "http://";
-		$this->domain = $protocol.$_SERVER["HTTP_HOST"]."/".$this->domainPath;
+		// $protocol = isset($_SERVER['HTTPS']) ? "https://" : "http://";
+		$this->domain = "/".$this->domainPath;
 	}
 	
 	function getModuleDirectories(){
@@ -965,6 +975,7 @@ class Quince{
 	// deprecated
 	function getDomainName(){
 		// LOG: "Deprecated Function Used: getDomainName() ";
+		trigger_error("Deprecated Function Used: getDomainName(). Use getDomain()", E_USER_NOTICE);
 		$this->_log("Deprecated Function Used: getDomainName(). Use getDomain()");
 		return $this->getDomain();
 	}
