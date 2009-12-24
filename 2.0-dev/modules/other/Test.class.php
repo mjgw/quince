@@ -5,8 +5,6 @@ class Test extends QuinceBase{
     public function testMethod(){
         
         // echo "testMethod<br />";
-        // return array();
-        return "Blah";
         
     }
     
@@ -14,7 +12,7 @@ class Test extends QuinceBase{
         
         // print_r($get);
         // echo "otherMethod<br />";
-        $this->forward('test', 'testMethod');
+        // $this->forward('test', 'testMethod');
         
     }
     

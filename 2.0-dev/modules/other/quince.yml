@@ -1,0 +1,14 @@
+module:
+  class: Test
+  shortname: other
+  code_id: com.smartest.Marcus
+  longname: Second Test Module for Quince 2.0
+  default_action: myMethod
+  aliases:
+    - {url: /marcus/gilroy-ware, action: otherMethod}
+    - {url: /this_is/dynamic/:test/:argument, action: otherMethod}
+  meta:
+    system: true
+  namespace:
+    ns:
+      affects: [methods, class]
