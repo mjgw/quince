@@ -4,60 +4,135 @@ class QuinceAction{
     
     protected $_request;
     protected $_use_checking;
+    protected $_action_object;
+    protected $_methods;
+    protected $_action;
+    protected $_class;
+    protected $_module_info;
     
-    public function __construct($r, $use_checking=true){
-        $this->_request = $r;
+    public function __construct($use_checking=true){
         $this->_use_checking = $use_checking;
     }
     
-    public function execute(){
+    public function assignRequest($r){
+        $this->_request = $r;
+    }
+    
+    public function prepareActionObject(){
         
-        if($m = QuinceUtilities::cacheGet('module_config_'.$this->_request->getModule())){
+        if($this->_module_info = QuinceUtilities::cacheGet('module_config_'.$this->_request->getModule())){
 	        
 	        if(!$this->_request->getAction()){
-	            $this->_request->setAction($m['default_action']);
+	            $this->_request->setAction($this->_module_info['default_action']);
 	        }
 	        
-	        if($this->_request->getNamespace() != 'default' || isset($m['namespaces']['default'])){
-	            if(isset($m['namespaces'][$this->_request->getNamespace()]['affect'])){
-	                $affect = $m['namespaces'][$this->_request->getNamespace()]['affect'];
-	                $class = ($affect == 'class') ? $this->_request->getNamespace().'_'.$m['class'] : $m['class'];
-	                $action = ($affect == 'action') ? $this->_request->getNamespace().'_'.$this->_request->getAction() : $this->_request->getAction();
-	                $default_action = ($affect == 'action') ? $this->_request->getNamespace().'_'.$m['default_action'] : $m['default_action'];
-	            }else{
-	                $class = $m['class'];
-	                $action = $this->_request->getAction();
-	                $default_action = $m['default_action'];
-	            }
-	        }else{
-	            $class = $m['class'];
-	            $action = $this->_request->getAction();
-	            $default_action = $m['default_action'];
-	        }
+	        $class_modified_by_namespace = false;
+	        $action_modified_by_namespace = false;
 	        
-	        $class = $m['class'];
-            $action = $this->_request->getAction();
-	        
-	        if(is_file($m['directory'].$class.'.class.php')){
-	            
-	            if(!class_exists($class)){
-	                include($m['directory'].$class.'.class.php');
+	        // Set the class and action names, accounting for any modifications from the namespace
+            if($this->_request->getNamespace() != 'default' || isset($this->_module_info['namespaces']['default'])){
+                
+                /* if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()]['affect'])){
+                    $affect = $this->_module_info['namespaces'][$this->_request->getNamespace()]['affect'];
+                    $this->_class = ($affect == 'class') ? $this->_request->getNamespace().'_'.$this->_module_info['class'] : $this->_module_info['class'];
+                    $this->_action = ($affect == 'action') ? $this->_request->getNamespace().'_'.$this->_request->getAction() : $this->_request->getAction();
+                    // $default_action = ($affect == 'action') ? $this->_request->getNamespace().'_'.$this->_module_info['default_action'] : $this->_module_info['default_action'];
+                    
+                }else{
+                    $this->_class = $this->_module_info['class'];
+                    $this->_action = $this->_request->getAction();
+                    $default_action = $this->_module_info['default_action'];
+                } */
+                // echo "test";
+                
+                // echo $this->_request->getNamespace();
+                
+                if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()]['class'])){
+                    $this->_class = $this->_module_info['namespaces'][$this->_request->getNamespace()]['class'];
+                    $class_modified_by_namespace = true;
+                }else{
+                    $this->_class = $this->_module_info['class'];
                 }
                 
-                if(!$this->_use_checking || ($this->_use_checking && class_exists($class))){
+                if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()]['default_action'])){
+                    $this->_module_info['default_action'] = $this->_module_info['namespaces'][$this->_request->getNamespace()]['default_action'];
+                    $default_action_modified_by_namespace = true;
+                }
+                
+                if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()]['action_prefix'])){
+                    $this->_action = $this->_module_info['namespaces'][$this->_request->getNamespace()]['action_prefix'].'_'.$this->_request->getAction();
+                    $action_modified_by_namespace = true;
+                }else{
+                    $this->_action = $this->_request->getAction();
+                }
+                
+                $default_action = isset($this->_module_info['default_action']) ? $this->_module_info['default_action'] : null;
+                
+            }else{
+                $this->_class = $this->_module_info['class'];
+                $this->_action = $this->_request->getAction();
+                if(isset($this->_module_info['default_action'])){
+                    $default_action = $this->_module_info['default_action'];
+                }else{
+                    // Module does not name the default action
+                }
+            }
+
+            // $this->_class = $this->_module_info['class'];
+            $this->_action = $this->_request->getAction();
+	        
+	        // Make sure the actual class file exists
+	        if(!$this->_use_checking || ($this->_use_checking && is_file($this->_module_info['directory'].$this->_class.'.class.php'))){
+	            
+	            if(!class_exists($this->_class)){
+	                include($this->_module_info['directory'].$this->_class.'.class.php');
+                }
+                
+                // Check that the module's class exists by seeing whether, once the file has been included, the class is defined
+                if(!$this->_use_checking || ($this->_use_checking && class_exists($this->_class))){
 	                
+	                // set up charsets and content types
+                    if($this->_request->getNamespace() == 'default' && !isset($this->_module_info['namespaces']['default'])){
+                        $this->_request->setCharset(Quince::$default_charset);
+                        $this->_request->setContentType(Quince::$default_content_type);
+                    }else{
+                        if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()])){
+                            $this->_request->setCharset(Quince::$default_charset);
+                            $this->_request->setContentType(Quince::$default_content_type);
+                            if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()]['charset']) && $this->_module_info['namespaces'][$this->_request->getNamespace()]['charset']) $this->_request->setCharset($this->_module_info['namespaces'][$this->_request->getNamespace()]['charset']);
+                            if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()]['content_type']) && $this->_module_info['namespaces'][$this->_request->getNamespace()]['content_type']) $this->_request->setContentType($this->_module_info['namespaces'][$this->_request->getNamespace()]['content_type']);
+                        }else{
+                            $this->_request->setCharset(Quince::$default_charset);
+                            $this->_request->setContentType(Quince::$default_content_type);
+                        }
+                    }
+
+                    // pass on extra info in the module config
+                    $this->_request->setMetas($this->_module_info['meta']);
+                    if(isset($this->_module_info['namespaces'][$this->_request->getNamespace()]['meta']) && is_array($this->_module_info['namespaces'][$this->_request->getNamespace()]['meta'])){
+                        foreach($this->_module_info['namespaces'][$this->_request->getNamespace()]['meta'] as $k => $v){
+                            $this->_request->setMeta($k, $v);
+                        }
+                    }
+
+                    $this->_request->setMeta('_module_longname', $this->_module_info['longname']);
+                    $this->_request->setMeta('_module_identifier', $this->_module_info['identifier']);
+                    $this->_request->setMeta('_module_dir', $this->_module_info['directory']);
+                    $this->_request->setMeta('_module_php_class', $this->_class);
+	                
+	                // Check that the method is implemented, but only if use checking is enabled
 	                if($this->_use_checking){
 	                    
-	                    $actions = get_class_methods($class);
+	                    $this->_methods = get_class_methods($this->_class);
 	                    
-	                    if(!in_array($action, $actions)){
+	                    if(!in_array($this->_action, $this->_methods)){
 	                        
-	                        if($action == $default_action){
-	                            throw new QuinceException("Class '".$class."' does not contain required action: ".$action);
+	                        if($this->_action == $default_action){
+	                            throw new QuinceException("Class '".$this->_class."' does not contain required action: ".$this->_action);
                             }
                             
-                            if(!in_array($default_action, $actions)){
-                                throw new QuinceException("Class '".$class."' does not contain required action: ".$action.", nor the module default action: ".$default_action.".");
+                            if(!in_array($default_action, $this->_methods)){
+                                throw new QuinceException("Class '".$this->_class."' does not contain required action: ".$this->_action.", nor the module default action: ".$default_action.".");
                             }else{
                                 $this->_request->setAction($default_action);
                             }
@@ -65,71 +140,77 @@ class QuinceAction{
 	                    
 	                }
 	                
-	                $o = new $class;
+	                // Instantiate the class
+	                $this->_action_object = new $this->_class($this->_request);
 	                
-	                if($this->_use_checking){
-	                
-	                    if(!is_callable(array($o, $action))){
-                            throw new QuinceException("Method '".$action."' of class '".$class."' is either private or protected, and cannot be called.");
-                        }
-                    
-                    }
-	                
-	                $vars = $this->_request->getRequestVariables();
-	                $args = array('get'=>$vars, 'post'=>$_POST);
-	                
-	                try{
-	                    
-	                    // set up charsets and content types
-	                    if($this->_request->getNamespace() == 'default' && !isset($m['namespaces']['default'])){
-    	                    $this->_request->setCharset(Quince::$default_charset);
-    	                    $this->_request->setContentType(Quince::$default_content_type);
-    	                }else{
-    	                    if(isset($m['namespaces'][$this->_request->getNamespace()])){
-    	                        if(isset($m['namespaces'][$this->_request->getNamespace()]['charset']) && $m['namespaces'][$this->_request->getNamespace()]['charset']) $this->_request->setCharset($m['namespaces'][$this->_request->getNamespace()]['charset']);
-    	                        if(isset($m['namespaces'][$this->_request->getNamespace()]['content_type']) && $m['namespaces'][$this->_request->getNamespace()]['content_type']) $this->_request->setContentType($m['namespaces'][$this->_request->getNamespace()]['content_type']);
-	                        }else{
-	                            $this->_request->setCharset(Quince::$default_charset);
-        	                    $this->_request->setContentType(Quince::$default_content_type);
-	                        }
-    	                }
-    	                
-    	                // pass on extra info in the module config
-    	                $this->_request->setMetas($m['metas']);
-    	                if(isset($m['namespaces'][$this->_request->getNamespace()]['meta']) && is_array($m['namespaces'][$this->_request->getNamespace()]['meta'])){
-	                        foreach($m['namespaces'][$this->_request->getNamespace()]['meta'] as $k => $v){
-	                            $this->_request->setMeta($k, $v);
-	                        }
-	                    }
-    	                $this->_request->setMeta('_module_longname', $m['longname']);
-    	                $this->_request->setMeta('_module_identifier', $m['identifier']);
-    	                $this->_request->setMeta('_php_class', $class);
-    	                
-    	                
-    	                // make the request object available to the action itself
-    	                if(!$this->_use_checking || ($this->_use_checking && in_array('setCurrentRequest', $actions))){
-    	                    $o->setCurrentRequest($this->_request);
-    	                }
-    	                
-	                    // call the function. If it forwards, this will be the last line that gets executed
-	                    $result = call_user_func_array(array($o, $action), $args);
-	                    
-	                    return $result;
-	                    
-	                }catch(Exception $e){
-                        throw $e;
-    	            }
+	                // Make the action object available in the request data
+	                $this->_request->setUserActionObject($this->_action_object);
 	                
 	            }else{
-	                throw new QuinceException("File ".$class.".class.php does not contain required class: ".$class);
+	                throw new QuinceException("File ".$this->_class.".class.php does not contain required class: ".$this->_class);
 	            }
 	        }else{
-	            throw new QuinceException("Module '{$this->_request->getModule()}' does not contain required class file: ".$m['directory'].$class.'.class.php');
+	            if($class_modified_by_namespace){
+	                throw new QuinceException("Module '{$this->_request->getModule()}' does not contain class file required by this namespace: ".$this->_module_info['directory'].$this->_class.'.class.php');
+	            }else{
+	                throw new QuinceException("Module '{$this->_request->getModule()}' does not contain required class file: ".$this->_module_info['directory'].$this->_class.'.class.php');
+                }
 	        }
 	        
 	    }else{
 	        throw new QuinceException("Could not retrieve module info for module '{$this->_request->getModule()}' from cache.");
 	    }
+        
+    }
+    
+    public function execute(){
+        
+        // make sure the method is callable
+        if($this->_use_checking){
+            
+            if(!is_callable(array($this->_action_object, $this->_action))){
+                
+                if($this->_action == $this->_module_info['default_action']){
+                    throw new QuinceException("Method '".$this->_action."' of class '".$this->_class."' is either private or protected, and cannot be called.");
+                }else{
+                    if(is_callable(array($this->_action_object, $this->_module_info['default_action']))){
+                        // the current action is not the default action
+                        $this->_action = $this->_module_info['default_action'];
+                    }else{
+                        throw new QuinceException("Method '".$this->_action."' of class '".$this->_class."' is either private or protected, and cannot be called. The module's default action was not callable either");
+                    }
+                }
+            }
+        
+        }
+        
+        // make the request object available to the action itself
+        if(!$this->_use_checking || ($this->_use_checking && in_array('setCurrentRequest', $this->_methods))){
+            $this->_action_object->setCurrentRequest($this->_request);
+        }
+        
+        // $args is to enable easy migration from earlier Quince versions
+        $vars = $this->_request->getRequestParameters();
+        $args = array('get'=>$vars, 'post'=>$_POST);
+        
+        try{
+            
+            $this->_request->setUserActionObject($this->_action_object);
+            
+            // call the module's pre-action function
+            $this->_action_object->__pre();
+            
+            // now call the function. If it forwards, this will be the last line that gets executed
+            $result = call_user_func_array(array($this->_action_object, $this->_action), $args);
+            
+            // call the module's post-action function
+            $this->_action_object->__post();
+            
+            return $result;
+            
+        }catch(Exception $e){
+            throw $e;
+        }
         
     }
 
@@ -145,11 +226,12 @@ class QuinceRequest{
     protected $_content_type = null;
     protected $_charset = null;
     protected $_is_alias = false;
-    protected $_request_variables = array();
+    protected $_request_params = array();
     protected $_metas = array();
     protected $_result = null;
+    protected $_user_action_object = null;
     
-    final public function getModificationsEnabled($m){
+    final public function getModificationsEnabled(){
         return $this->_modifications_allowed;
     }
     
@@ -193,11 +275,18 @@ class QuinceRequest{
         return $this->_request_string;
     }
     
+    final public function getRequestStringWithVars(){
+        $rs = $this->_request_string;
+        if(isset($_SERVER['QUERY_STRING']{0})){
+            $rs .= '?'.$_SERVER['QUERY_STRING'];
+        }
+        return $rs;
+    }
+    
     final public function getHyperlinkRequestString(){
         if($this->_namespace == 'default'){
             return $this->_request_string;
         }else{
-            // return $this->_request_string.$this->_namespace.':';
             if($this->_request_string){
                 return $this->_request_string;
             }else{
@@ -249,16 +338,20 @@ class QuinceRequest{
         $this->_namespace = $n;
     }
     
-    final public function getRequestVariable($n){
-        return $this->_request_variables[$n];
+    final public function hasRequestParameter($n){
+        return isset($this->_request_params[$n]);
     }
     
-    final public function setRequestVariable($n, $v){
-        $this->_request_variables[$n] = $v;
+    final public function getRequestParameter($n, $default=''){
+        return isset($this->_request_params[$n]) ? $this->_request_params[$n] : $default;
     }
     
-    final public function getRequestVariables(){
-        return $this->_request_variables;
+    final public function setRequestParameter($n, $v){
+        $this->_request_params[$n] = $v;
+    }
+    
+    final public function getRequestParameters(){
+        return $this->_request_params;
     }
     
     final public function getIsAlias(){
@@ -271,6 +364,10 @@ class QuinceRequest{
     
     final public function isReady(){
         return isset($this->_module);
+    }
+    
+    final public function isAjax(){
+        return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
     }
     
     final public function getResult(){
@@ -286,22 +383,57 @@ class QuinceRequest{
     }
     
     final public function setMetas($m){
-        $this->_metas = $m;
+        if(is_array($m)){
+            $this->_metas = array_merge($m, $this->_metas);
+        }
     }
     
-    final public function getMeta(){
-        return $this->_metas;
+    final public function getMeta($m){
+        if(isset($this->_metas[$m])){
+            return $this->_metas[$m];
+        }
+    }
+    
+    final public function hasMeta($m){
+        return isset($this->_metas[$m]);
+    }
+    
+    final public function getModuleDirectory(){
+        return $this->getMeta('_module_dir');
     }
     
     final public function setMeta($name, $value){
         $this->_metas[$name] = $value;
     }
     
+    final public function getClass(){
+        return $this->_metas['_module_php_class'];
+    }
+    
+    final public function getUserActionObject(){
+        return $this->_user_action_object;
+    }
+    
+    final public function setUserActionObject($o){
+        $this->_user_action_object = $o;
+    }
+    
+    public function getUrlProtocol(){
+        return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ? "https://" : "http://";
+    }
+    
 }
 
+// This class should be extended by the modules' main classes
 class QuinceBase{
     
     protected $_request;
+    protected $_accepts_gifts = true;
+    
+    final public function __construct($r){
+        $this->setCurrentRequest($r);
+        $this->__moduleConstruct();
+    }
     
     protected function forward($module, $action){
         
@@ -312,21 +444,118 @@ class QuinceBase{
         
     }
     
+    final public function lock(){
+        $this->_accepts_gifts = false;
+    }
+    
+    public function give($name, $data){
+        
+        if($this->_accepts_gifts){
+        
+            if($name == '_request'){
+                throw new QuinceException("Cannot overwrite QuinceBase->_request with QuinceBase->give()");
+            }
+        
+            $this->$name = $data;
+        
+        }else{
+            throw new QuinceException("Cannot use QuinceBase->give() once the module has been locked");
+        }
+        
+    }
+    
+    protected function redirect($to, $http_code=303){
+        
+        $destination = $this->_handleDestination($to);
+		throw new QuinceRedirectException($destination);
+		
+    }
+    
+    protected function _handleDestination($to){
+        
+        if(!$to){
+			
+			$destination = $this->_request->getDomain();
+			
+		}else if($to{0} == "/"){
+		    
+		    if($this->_request->getDomain() == '/' || substr($to, 0, strlen($this->_request->getDomain())) == $this->_request->getDomain()){
+		        $destination = $to;
+	        }else{
+	            $destination = $this->_request->getDomain().substr($to, 1);
+	        }
+	        
+	    }else if(preg_match('/^@(\w+):(\w+)(\?(.*))?$/', $to, $matches)){
+            
+            $r = new QuinceRouter;
+            $r->setRequest($this->_request);
+            
+            if($r->routeExists($matches[1].':'.$matches[2])){
+                $destination = $r->fetchRouteUrl($to, $matches);
+            }else{
+                $destination = '';
+            }
+            
+		}else if(preg_match('/^@(\w+)(\?(.*))?$/', $to, $matches)){
+		    
+		    $r = new QuinceRouter;
+            $r->setRequest($this->_request);
+            if($r->routeExists($this->_request->getModule().':'.$matches[1])){
+                $destination = $r->fetchRouteUrl('@'.$this->_request->getModule().':'.$matches[1].$matches[2]);
+            }else{
+                $destination = '';
+            }
+            
+		}else{
+		    $destination = $to;
+		}
+        
+        return $destination;
+        
+    }
+    
     public function setCurrentRequest($r){
         $this->_request = $r;
     }
     
     protected function getRequest(){
-        // TODO
+        return $this->_request;
     }
+    
+    protected function setContentType($mime_type='text/html'){
+        $this->_request->setContentType($mime_type);
+    }
+    
+    protected function setCharset($charset='utf-8'){
+        $this->_request->setCharset($charset);
+    }
+    
+    protected function sendContentTypeHeader($mime_type=false, $charset=false){
+        
+        if($mime_type){
+            $this->setContentType($mime_type);
+        }
+        
+        if($charset){
+            $this->setCharset($charset);
+        }
+        
+        $cth = 'Content-Type: '.$this->_request->getContentType().'; charset='.$this->_request->getCharSet();
+	    header($cth);
+        
+    }
+    
+    protected function __moduleConstruct(){}
+    public function __pre(){}
+    public function __post(){}
     
 }
 
 class QuinceUtilities{
     
+    public static $quince;
+    
     public static function cacheGet($name){
-        // $fn = QUINCE_CACHE_DIR.substr(md5($name),0,8).'.tmp';
-        // $fn = Quince::$cache_dir.substr(md5($name),0,8).'.tmp';
         $fn = Quince::$cache_dir.md5($name).'.tmp';
         if(file_exists($fn)){
             return unserialize(file_get_contents($fn));
@@ -336,22 +565,16 @@ class QuinceUtilities{
     }
     
     public static function cacheSet($name, $data){
-        // $fn = QUINCE_CACHE_DIR.substr(md5($name),0,8).'.tmp';
-        // $fn = Quince::$cache_dir.substr(md5($name),0,8).'.tmp';
         $fn = Quince::$cache_dir.md5($name).'.tmp';
         return file_put_contents($fn, serialize($data));
     }
     
     public static function cacheHas($name){
-        // $fn = QUINCE_CACHE_DIR.substr(md5($name),0,8).'.tmp';
-        // $fn = Quince::$cache_dir.substr(md5($name),0,8).'.tmp';
         $fn = Quince::$cache_dir.md5($name).'.tmp';
         return file_exists($fn);
     }
     
     public static function cacheClear($name){
-        // $fn = QUINCE_CACHE_DIR.substr(md5($name),0,8).'.tmp';
-        // $fn = Quince::$cache_dir.substr(md5($name),0,8).'.tmp';
         $fn = Quince::$cache_dir.md5($name).'.tmp';
         if(file_exists($fn)){
             return unlink($fn);
@@ -362,7 +585,7 @@ class QuinceUtilities{
     
     public static function fetchConfig($config_file){
 	    $config = self::yamlLoad($config_file);
-        return $config['quince'];
+	    return $config['quince'];
 	}
 	
 	public static function fetchModuleConfig($config_file){
@@ -371,13 +594,14 @@ class QuinceUtilities{
 	}
 	
 	public static function yamlLoad($file_name){
-        if(is_file($file_name)){
+	    if(is_file($file_name)){
             $spyc = new Spyc;
-            $array = $spyc->load($file_name);
+            $array = $spyc->loadFile($file_name);
             return $array;
         }else{
             // error
-            SmartestLog::getInstance('system')->log("SmartestYamlHelper tried to load non-existent file: ".$file_name, SM_LOG_WARNING);
+            // throw new QuinceException("QuinceUtilities tried to load non-existent YAML file: ".$file_name);
+            self::$quince->handleException(new QuinceException("QuinceUtilities tried to load non-existent YAML file: ".$file_name));
         }
     }
     
@@ -392,7 +616,7 @@ class QuinceUtilities{
                 return $content;
             }
         }else{
-            throw new QuinceException("SmartestYamlHelper tried to load non-existent file: ".$file_name, SM_LOG_WARNING);
+            throw new QuinceException("QuinceUtilities tried to load non-existent YAML file: ".$file_name);
         }
     }
     
@@ -414,8 +638,7 @@ class QuinceUtilities{
 		}
 		
 		closedir($res);
-
-		return $files;
+        return $files;
         
     }
     
@@ -436,10 +659,153 @@ class QuinceUtilities{
     public static function stripSlashesFromArray($value){
 		return is_array($value) ? array_map(array('QuinceUtilities','stripSlashesFromArray'), $value) : utf8_encode(stripslashes($value));
 	}
+	
+	public static function getAliasUrlRequiredArguments($alias_url){
+	    preg_match_all('/(:|\$)([\w_]+)/', $alias_url, $matches);
+	    return $matches[2];
+	}
+	
+	public static function buildQueryString($vars){
+	    
+	    $frags = array();
+	    
+	    foreach($vars as $k => $v){
+	        $frags[] = $k.'='.$v;
+	    }
+	    
+	    return implode('&', $frags);
+	}
     
 }
 
-class QuinceException extends Exception{}
+class QuinceRouter{
+    
+    protected $_request;
+    
+    public function setRequest($r){
+        $this->_request = $r;
+    }
+    
+    public function routeExists($route){
+        return array_key_exists($route, Quince::$routes);
+    }
+    
+    public function fetchRouteUrl($rc, $matches='', $specified_namespace='default'){
+        
+        if(!is_array($matches)){
+            if (!preg_match('/^@(\w+):(\w+)(\?(.*))?$/', $rc, $matches)){
+                
+                if(preg_match('/^@(\w+)(\?(.*))?$/', $rc, $f_matches)){
+                    $matches = array();
+                    $matches[1] = $this->_request->getModule();
+                    $matches[2] = $f_matches[1];
+                    $matches[3] = $f_matches[2];
+                    $matches[4] = $f_matches[3];
+                }else{
+                    // Provided string is not a route
+                }
+            }
+        }
+        
+        $k = $matches[1].':'.$matches[2];
+        
+        if(isset(Quince::$routes[$k])){
+            
+            $route = Quince::$routes[$k];
+            $params = (isset($route['params']) && is_array($route['params'])) ? $route['params'] : array();
+        
+            if(strlen($matches[3])){
+                $new_params = array();
+                parse_str($matches[4], $new_params);
+                $params = array_merge($params, $new_params);
+            }
+            
+            if($specified_namespace == 'default'){
+                if(isset($params['namespace'])){
+                    $namespace = $params['namespace'];
+                    unset($params['namespace']);
+                }else{
+                    $namespace = 'default';
+                }
+            }else{
+                $namespace = $specified_namespace;
+            }
+        
+            if(isset($route['url'])){
+                
+                if($namespace == 'default'){
+                    $url = $this->_request->getDomain().substr($route['url'], 1);
+                }else{
+                    $url = $this->_request->getDomain().$namespace.'+_NSS+'.substr($route['url'], 1);
+                }
+            
+                $route_required_params = QuinceUtilities::getAliasUrlRequiredArguments($route['url']);
+                
+                foreach($route_required_params as &$rp){
+                    if(isset($params[$rp])){
+                        $params[$rp] = str_replace('$', '\$', $params[$rp]);
+                        $url = preg_replace('/:'.$rp.'/', $params[$rp], $url);
+                        unset($params[$rp]);
+                        unset($rp);
+                    }else{
+                        throw new QuinceException('Route @'.$route['module'].':'.$route['name'].' requires a missing \''.$rp.'\' parameter.');
+                    }
+                }
+                
+                if(count($params)){
+                    $url .= '?'.$this->toUrlParameterString($params);
+                }
+                
+                return str_replace('+_NSS+', ':', $url);
+            
+            }else{
+            
+                // No url is specified for this route, so just return the ordinary /module/action?args type of URL
+                if($namespace == 'default'){
+                    $url = $this->_request->getDomain().$route['module'].'/'.$route['action'];
+                }else{
+                    $url = $this->_request->getDomain().$namespace.'+_NSS+'.$route['module'].'/'.$route['action'];
+                }
+            
+                if(strlen($matches[3])){
+                    $url.='?'.QuinceUtilities::buildQueryString($params);
+                }
+            
+                return $url;
+            }
+            
+        }else{
+            
+            throw new QuinceException('Route @'.$matches[1].':'.$matches[2].' is not defined.');
+            
+        }
+    }
+    
+    public function toUrlParameterString($array){
+        
+        $string = '';
+        
+        if(!is_array($array)){
+	        return '';
+	    }else{
+	        
+	        $i = 0;
+	        
+	        foreach($array as $key=>$value){
+	            if($i > 0) $string .= '&';
+	            $string .= $key.'='.urlencode($value);
+                $i++;
+	        }
+	        
+	        return $string;
+	    }
+	}
+    
+}
+
+class QuinceException extends Exception{
+    // this is done so that Exception functionality can be added with minimal disruption
+}
 
 class QuinceForwardException extends QuinceException{
 
@@ -464,10 +830,50 @@ class QuinceForwardException extends QuinceException{
 
 }
 
+class QuinceRedirectException extends QuinceException{
+
+    protected $_redirectUrl = null;
+    protected $_status_codes = array(301=>"Moved Permanently", 302=>"Found", 303=>"See Other", 304=>"Not Modified", 305=>"Use Proxy", 307=>"Temporary Redirect");
+    
+    const PERMANENT = 301;
+    const FOUND = 302;
+    const SEE_OTHER = 303;
+    const NOT_MODIFIED = 304;
+    const USE_PROXY = 305;
+    const TEMPORARY = 307;
+    
+    public function __construct($url=false){
+        if(strlen($url)){
+            $this->_redirectUrl = $url;
+        }
+    }
+    
+    public function setRedirectUrl($url){
+	    $this->_redirectUrl = $url;
+	}
+	
+	public function getRedirectUrl(){
+	    return $this->_redirectUrl;
+	}
+	
+	public function redirect($sc=303, $exit=true){
+	    
+	    header("HTTP/1.1 ".$sc." ".$this->_status_codes[$sc]);
+	    header("Location: ".$this->getRedirectUrl());
+        
+        if($exit){
+            // exit;
+        }
+	    
+	}
+
+}
+
 class Quince{
     
     const CURRENT_URL = '___QUINCE_CURRENT_URL';
     const CURRENT_DIR = '___QUINCE_CURRENT_DIR';
+    const VERSION = '2.0 beta';
     
     protected $_home_dir;
     protected $_cache_dir;
@@ -479,8 +885,18 @@ class Quince{
 	protected $_exception_handling;
 	protected $_existing_modules;
 	protected $_num_forwards = 0;
-	protected $_next_request;
+	protected $_num_redirects = 0;
+	protected $_current_request;
+	protected $_current_action;
+    protected $_use_manual_domain = false;
+    protected $_manual_domain = '/';
 	
+	public $module_shortnames;
+	
+	public static $modules;
+	public static $raw_aliases;
+	public static $alias_shortcuts;
+	public static $routes;
 	public static $home_dir;
 	public static $cache_dir;
 	public static $default_charset;
@@ -501,8 +917,12 @@ class Quince{
         // make some values available to other classes and beyond, as constants
         self::$home_dir = $this->_home_dir;
         
+        if(!is_file($this->_home_dir.$config_file)){
+            throw new QuinceException('Quince configuration file not found: '.self::$this->_home_dir.$config_file);
+        }
+        
         // load quince configuration
-        $config = QuinceUtilities::fetchConfig($config_file);
+        $config = QuinceUtilities::fetchConfig($this->_home_dir.$config_file);
         $this->_exception_handling = $config['exception_handling'];
         $this->_module_dirs = $config['modules']['storage'];
         $this->_module_conf = $config['modules']['config'];
@@ -517,6 +937,11 @@ class Quince{
         self::$default_charset = $config['default_charset'];
         self::$default_content_type = $config['default_content_type'];
         self::$use_namespaces = $config['use_namespaces'];
+        
+        if(isset($config['domain'])){
+            $this->_use_manual_domain = true;
+            $this->_manual_domain = $config['domain'];
+        }
         
     }
     
@@ -541,57 +966,177 @@ class Quince{
 	    
 	    $r = new $this->_request_class;
 	    
-	    // MultiViews support: look for URLS like index.php/module/action
-		$fc_filename = basename($_SERVER['SCRIPT_FILENAME']).'/';
-		$fc_filename_len = strlen($fc_filename);
-		
-	    $ulength = strlen($url.'/');
+	    // $ulength = strlen($url.'/');
 	    
+	    // echo getcwd().' ';
+	    // echo $_SERVER["DOCUMENT_ROOT"].'/ ';
+	    // echo $url;
+	    
+	    /* 
 	    // If the end of the url and the file path are the same
 	    if(substr(getcwd().'/', $ulength*-1, $ulength) == $url.'/'){
 	        $r->setRequestString('');
 	        $r->setDomain($url.'/');
 	        return $r;
 	    }
+	    */
 	    
-	    // Calculate the domain
-	    $hdp = explode('/', getcwd());
-        array_shift($hdp);
-        $hdp = array_reverse($hdp);
-        
-        $argnum = 1;
-        $count = (count($hdp)-1);
-        $ds = array();
-        
-        for($i=0;$i<$count;++$i){
-            $ds[] = '/'.implode('/', array_reverse(array_slice($hdp, 0, ($argnum * -1)))).'/';
-            ++$argnum;
-        }
-        
-        $ds = array_reverse($ds);
-        $r->setRequestString(substr($url, 1));
-        $r->setDomain('/');
-        
-        // Loop through the directory paths until one matches
-        foreach($ds as $try){
+        if($this->_use_manual_domain){
             
-            $dlen = strlen($try);
+            $r->setDomain($this->_manual_domain);
+            $r->setRequestString(substr($url, 1));
             
-            if(substr($url, 0, $dlen) == $try){
-                
-                $r->setRequestString(substr($url, $dlen));
-                $r->setDomain($try);
-                
-                if(substr($r->getRequestString(), 0, $fc_filename_len) == $fc_filename){
-        		    $r->setDomain($r->getDomain().$fc_filename);
-        		    $r->setRequestString(substr($r->getRequestString(), $fc_filename_len));
-        		}
-                
-                return $r;
+        }else{
+            
+    	    // TAKE ALL THE BITS OF THE REQUEST_URI THAT AREN'T IN THE DOCUMENT_ROOT AND MAKE THEM THE DOMAIN
+	    
+    	    $test_url = $url{(strlen($url)-1)} == '/' ? substr($url, 0, -1) : $url;
+	    
+    	    // Calculate the domain
+    	    $dr = realpath($_SERVER["DOCUMENT_ROOT"]).'/';
+    	    $hdp = explode('/', $test_url);
+        
+            array_shift($hdp);
+            $possible_dir = implode('/', $hdp).'/';
+        
+            // MultiViews support: look for URLS like index.php/module/action
+    		// $fc_filename = basename($_SERVER['SCRIPT_FILENAME']);
+    		// $fc_filename_len = strlen($fc_filename)+1;
+		
+    		while(!is_dir($dr.$possible_dir)){
+                array_pop($hdp);
+                $possible_dir = implode('/', $hdp).'/';
             }
+        
+            /* if(substr($possible_dir, 0, $fc_filename_len) == '/'.$fc_filename){
+    		    $possible_dir .= $fc_filename.'/';
+    		    $url = substr($url, $fc_filename_len);
+    		} */
+        
+            if($possible_dir == '/'){
+                $r->setDomain('/');
+                $r->setRequestString(substr($url, 1));
+            }else{
+                $r->setDomain('/'.$possible_dir);
+                $r->setRequestString(substr($url, strlen($possible_dir)+1));
+            }
+        
+            /* if(is_dir($dr.$possible_dir)){
+                $r->setDomain('/'.$possible_dir);
+                $r->setRequestString(substr($url, strlen($possible_dir)+1));
+            }else{
+                $r->setDomain('/');
+                $r->setRequestString(substr($url, 1));
+            } */
+        
+            /* if($f === false){
+                throw new QuinceException("Domain could not be calculated: Document root not found in current working directory");
+            }else{
+                if($f > 0){
+                    $docroot = substr($cwd, 0, $f).$_SERVER["DOCUMENT_ROOT"];
+                }else{
+                    $docroot = $_SERVER["DOCUMENT_ROOT"];
+                }
+            } */
+        
+            /* if(strlen($cwd) == strlen($docroot)){
+            
+                $r->setRequestString('');
+    	        $r->setDomain($url.'/');
+    	        return $r;
+	        
+            }else if(strlen($cwd) > strlen($docroot)){
+            
+                $possible_domain = substr($cwd, strlen($docroot));
+                $start = strlen($possible_domain)+1;
+            
+                if(substr($_SERVER['REQUEST_URI'], 0, $start) == $possible_domain.'/'){
+                    $r->setDomain($possible_domain.'/');
+                    $r->setRequestString(substr($url, $start));
+                    return $r;
+                }
+            
+            } */
+        
+            // $num_folders = count($hdp);
+        
+            /* for($i=0;$i<$num_folders;$i++){
+                $try_path = '/'.implode('/', $hdp).'/';
+                // echo $try_path.' ';
+                $substr_start = strlen($try_path)*-1;
+                // print_r($hdp);
+                $request = array_pop($hdp).'/'.$request;
+                // echo $request;
+            
+            }
+        
+            $argnum = 1;
+            $count = (count($hdp)-1);
+            $ds = array();
+        
+            for($i=0;$i<$count;++$i){
+                $ds[] = '/'.implode('/', array_reverse(array_slice($hdp, 0, ($argnum * -1)))).'/';
+                ++$argnum;
+            }
+        
+            $ds = array_reverse($ds);
+            $r->setRequestString(substr($url, 1));
+            $r->setDomain('/');
+        
+            // Loop through the directory paths until one matches
+            foreach($ds as $try){
+            
+                $dlen = strlen($try);
+            
+                if(substr($url, 0, $dlen) == $try){
+                
+                    $r->setRequestString(substr($url, $dlen));
+                    $r->setDomain($try);
+                
+                    if(substr($r->getRequestString(), 0, $fc_filename_len) == $fc_filename){
+            		    $r->setDomain($r->getDomain().$fc_filename);
+            		    $r->setRequestString(substr($r->getRequestString(), $fc_filename_len));
+            		}
+                
+                    return $r;
+                }
+            } */
+            
         }
         
-        return $r;
+	    return $r;
+	}
+	
+	public function getUrlFor($route_name, $namespace='default'){
+	    
+	    if(preg_match('/^@(\w+):(\w+)(\?(.*))?$/', $route_name, $matches)){ // Another module from the one doing the requesting
+            
+            $r = new QuinceRouter;
+            $r->setRequest($this->_current_request);
+            
+            if($r->routeExists($matches[1].':'.$matches[2])){
+                return $r->fetchRouteUrl('@'.$matches[1].':'.$matches[2].$matches[3], $matches, $namespace);
+            }else{
+                throw new QuinceException("Supplied route '".$matches[1].':'.$matches[2]."' does not exist.");
+            }
+            
+		}else if(preg_match('/^@(\w+)(\?(.*))?$/', $route_name, $matches)){ // The same module as doing the requesting
+		    
+            $r = new QuinceRouter;
+            $r->setRequest($this->_current_request);
+            
+            if($r->routeExists($this->_current_request->getModule().':'.$matches[1])){
+                return $r->fetchRouteUrl('@'.$this->_current_request->getModule().':'.$matches[1].$matches[2], $namespace);
+            }else{
+                throw new QuinceException("Supplied route '".$this->_current_request->getModule().':'.$matches[1]."' does not exist.");
+            }
+            
+		}else{
+		    
+		    throw new QuinceException("Supplied route '".$route_name."' was invalid.");
+		    
+		}
+	    
 	}
 	
 	public function getNewModulesList(){
@@ -605,6 +1150,30 @@ class Quince{
         
         return $all_modules;
         
+	}
+	
+	public function getAllModulesById(){
+	    
+	    return self::$modules;
+	    
+	}
+    
+    public function getAllModuleDirectories(){
+        
+        return $this->_existing_modules;
+        
+    }
+	
+	public function getAllModulesByShortName(){
+	    
+	    $mdls = array();
+	    
+	    foreach(self::$modules as $m){
+	        $mdls[$m['shortname']] = $m;
+	    }
+	    
+	    return $mdls;
+	    
 	}
 	
 	protected function scanModules(){
@@ -642,15 +1211,19 @@ class Quince{
             // somewhere the module configs have changed. A deep traversal is in order.
             
             $aliases = array();
+            $routes = array();
+            $modules = array();
             $module_shortnames = array();
             $module_names = array();
             
             foreach($this->_existing_modules as $m){
+                
                 $cf = $m.$this->_module_conf;
                 if(is_file($cf)){
                     
                     $conf = QuinceUtilities::fetchModuleConfig($cf);
                     $conf['directory'] = $m;
+                    $modules[$conf['identifier']] = $conf;
                     
                     if(!isset($module_names[$conf['shortname']])){
                     
@@ -667,14 +1240,47 @@ class Quince{
                             }
                             $aliases = array_merge($aliases, $conf['aliases']);
                         }
+                        
+                        // get routes
+                        if(isset($conf['routes']) && is_array($conf['routes'])){
+                            
+                            $fake_route_aliases = array();
+                            
+                            foreach($conf['routes'] as $k => &$r){
+                                
+                                $r['module'] = $conf['shortname'];
+                                $r['name'] = $k;
+                                $routes[$conf['shortname'].':'.$k] = $r;
+                                
+                                // add routes that specify a url to aliases
+                                if(isset($r['url'])){
+                                    $fra = array();
+                                    $fra['action'] = $r['action'];
+                                    $fra['module'] = $conf['shortname'];
+                                    $fra['url'] = $r['url'];
+                                    if(isset($r['params'])){
+                                        $fra['params'] = $r['params'];
+                                    }
+                                    if(isset($r['meta'])){
+                                        $fra['meta'] = $r['meta'];
+                                    }
+                                    // if(isset($r['presentation'])){
+                                    //     $fra['presentation'] = $r['presentation'];
+                                    // }
+                                    $fake_route_aliases[] = $fra;
+                                }
+                            }
+                            
+                            $aliases = array_merge($aliases, $fake_route_aliases);
+                            
+                        }
                     }
-                    
                 }
             }
             
-            // write one long list of the aliases to cache
+			// write one long list of the aliases to cache
             QuinceUtilities::cacheSet('all_aliases', $aliases);
-            $this->raw_aliases = $aliases;
+            self::$raw_aliases = $aliases;
             
             // write one long list of the aliases to cache
             QuinceUtilities::cacheSet('module_shortnames', $module_shortnames);
@@ -682,41 +1288,73 @@ class Quince{
             
             // as configs have changed, alias shortcuts need to be refreshed
             QuinceUtilities::cacheClear('alias_url_shortcuts');
-            $this->alias_shortcuts = array();
+            self::$alias_shortcuts = array();
+            
+            // write one long list of the routes to cache
+            QuinceUtilities::cacheSet('routes', $routes);
+            self::$routes = $routes;
+            
+            // save list of all modules to cache
+            QuinceUtilities::cacheSet('all_modules', $modules);
+            self::$modules = $modules;
+            
+            // as configs have changed, route shortcuts need to be refreshed
+            // QuinceUtilities::cacheClear('route_shortcuts');
+            // self::$route_shortcuts = array();
             
             // write the new hash of the module configs to cache
             QuinceUtilities::cacheSet('all_modules_config_hash', $new_mcoh);
             
         }else{
-            $this->raw_aliases = QuinceUtilities::cacheGet('all_aliases');
-            $this->alias_shortcuts = QuinceUtilities::cacheGet('alias_url_shortcuts');
+            
+            self::$modules = QuinceUtilities::cacheGet('all_modules');
+            self::$raw_aliases = QuinceUtilities::cacheGet('all_aliases');
+            self::$alias_shortcuts = QuinceUtilities::cacheGet('alias_url_shortcuts');
+            self::$routes = QuinceUtilities::cacheGet('routes');
+            
+            // 
+            
             $this->module_shortnames = QuinceUtilities::cacheGet('module_shortnames');
         }
-	    
-	    if(!in_array($this->_default_module_name, $this->module_shortnames)){
+		
+		if(!in_array($this->_default_module_name, $this->module_shortnames)){
             $this->handleException(new QuinceException("The specified default module, '{$this->_default_module_name}', does not exist."));
         }
 	    
 	}
 	
-	public function doAction($r){
-	    
-	    $a = new QuinceAction($r, $this->_use_checking);
+	public function doAction(){
 	    
 	    try{
-	        $result = $a->execute();
+	        $result = $this->_current_action->execute();
 	        return $result;
 	    // Catch forwards
 	    }catch(QuinceForwardException $e){
 	        if($this->_num_forwards < 10){
-                $r->setModule($e->getModule());
-                $r->setAction($e->getAction());
+	            
+                $this->_current_request->setModule($e->getModule());
+                $this->_current_request->setAction($e->getAction());
                 ++$this->_num_forwards;
+                
                 // if the next action is also a forward, nothing will be returned, and so on.
                 // Something is returned only once an action is called that doesn't forward, but the whole cycle still triggered from here so we still have to use 'return'
-                return $this->doAction($r);
+                $a = new QuinceAction($this->_use_checking);
+        	    $a->assignRequest($this->_current_request);
+        	    $a->prepareActionObject();
+
+        	    $this->_current_action = $a;
+        	    return $this->doAction();
+                
             }else{
                 $this->handleException(new QuinceException("Quince has detected too many forwards. The maximum number is 10."));
+            }
+        
+        }catch(QuinceRedirectException $e){
+            if($this->_num_redirects < 10){
+                ++$this->_num_redirects;
+                $e->redirect();
+            }else{
+                $this->handleException(new QuinceException("Quince has detected too many redirects. The maximum number is 10."));
             }
         // Catch other "real" exceptions
         }catch(Exception $e){
@@ -725,9 +1363,9 @@ class Quince{
 	    
 	}
 	
-	public function dispatch($url='___QUINCE_CURRENT_URL', $do_action=true){
-        
-        if($url == "___QUINCE_CURRENT_URL"){
+	public function prepare($url='___QUINCE_CURRENT_URL'){
+	    
+	    if($url == "___QUINCE_CURRENT_URL"){
 	        $url = $_SERVER['REQUEST_URI'];
 	        $url_is_current_request = true;
 	    }else{
@@ -737,52 +1375,82 @@ class Quince{
 	    $url = $this->removeQueryString($url);
 	    
 	    try{
-	        $this->_next_request = $this->processRequest($url);
+	        $this->_current_request = $this->processRequest($url);
         }catch(QuinceException $e){
             $this->handleException($e);
         }
-	    
-	    // Scan the modules
+        
+        // Scan the modules
 	    try{
 	        $this->scanModules();
         }catch(QuinceException $e){
             $this->handleException($e);
         }
 	    
-	    $rs = $this->_next_request->getRequestString();
+	    $rs = $this->_current_request->getRequestString();
 	    
 	    // Next, is the request an alias?
 	    // if so, give the request object its associated module/action
 	    // First, check the alias shortcuts cache
-	    if(isset($this->alias_shortcuts[$rs])){
+	    if(isset(self::$alias_shortcuts[$rs])){
 	        
-	        $this->_next_request->setModule($this->alias_shortcuts[$rs]['module']);
-	        $this->_next_request->setAction($this->alias_shortcuts[$rs]['action']);
-	        $this->_next_request->setIsAlias(true);
+	        $this->_current_request->setModule(self::$alias_shortcuts[$rs]['module']);
+	        $this->_current_request->setAction(self::$alias_shortcuts[$rs]['action']);
+	        $this->_current_request->setIsAlias(true);
 	        
-	        foreach($this->alias_shortcuts[$rs]['url_vars'] as $n => $v){
-	            $this->_next_request->setRequestVariable($n, $v);
-	        }
+	        // if(is_array(self::$alias_shortcuts[$rs]['params'])){
+	        //    foreach(self::$alias_shortcuts[$rs]['params'] as $n => $v){
+    	    //        $this->_current_request->setRequestParameter($n, $v);
+    	    //    }
+	        // }
+	        
+	        if(is_array(self::$alias_shortcuts[$rs]['url_vars'])){
+	            foreach(self::$alias_shortcuts[$rs]['url_vars'] as $n => $v){
+	                $this->_current_request->setRequestParameter($n, $v);
+	            }
+            }
 	        
 	    }
 	    
-	    // the request might still be an alias
-	    foreach($this->raw_aliases as $alias){
+	    // the request might still be an alias - aliases might just not be cached
+	    foreach(self::$raw_aliases as $alias){
 	        
 	        // Aliases that do not use url vars
 	        if($alias['url'] == '/'.$rs){
-	            $this->_next_request->setModule($alias['module']);
-	            $this->_next_request->setAction($alias['action']);
-	            $this->_next_request->setIsAlias(true);
-	            $this->alias_shortcuts[$rs] = array();
-	            $this->alias_shortcuts[$rs]['module'] = $alias['module'];
-	            $this->alias_shortcuts[$rs]['action'] = $alias['action'];
-	            $this->alias_shortcuts[$rs]['url_vars'] = array();
-	            break;
+	            
+	            $this->_current_request->setModule($alias['module']);
+	            $this->_current_request->setAction($alias['action']);
+	            $this->_current_request->setIsAlias(true);
+	            
+	            self::$alias_shortcuts[$rs] = array();
+	            self::$alias_shortcuts[$rs]['module'] = $alias['module'];
+	            self::$alias_shortcuts[$rs]['action'] = $alias['action'];
+	            self::$alias_shortcuts[$rs]['url_vars'] = array();
+	            
+	            if(isset($alias['params'])){
+	                foreach($alias['params'] as $n => $v){
+	                    $this->_current_request->setRequestParameter($n, $v);
+	                }
+	                self::$alias_shortcuts[$rs]['params'] = $alias['params'];
+	            }
+                
+                if(isset($alias['meta'])){
+	                foreach($alias['meta'] as $n => $v){
+	                    $this->_current_request->setMeta($n, $v);
+	                }
+	                self::$alias_shortcuts[$rs]['meta'] = $alias['meta'];
+	            }
+                
+                if(isset($alias['presentation'])){
+                    $this->_current_request->setMeta('_presentation', $alias['presentation']);
+                }
+                
+                break;
 	        }
 	        
 	        // Aliases that do:
 	        $regex = '/^'.preg_replace('/\/(:|\$)([\w_]+)/i', "/([^\/]+)", QuinceUtilities::excapeRegexCharacters($alias['url'])).'\/?$/';
+            $regex = str_replace('*', '[^\/\.]+', $regex); // Marcus added this line Oct 5 2014
 	        
 	        if(preg_match($regex, '/'.$rs, $matches)){
 	            
@@ -792,72 +1460,94 @@ class Quince{
 	            array_shift($matches);
 	            $argvalues = ($matches);
 	            
-	            $this->alias_shortcuts[$rs] = array();
-	            $this->alias_shortcuts[$rs]['module'] = $alias['module'];
-	            $this->alias_shortcuts[$rs]['action'] = $alias['action'];
-	            $this->alias_shortcuts[$rs]['url_vars'] = array();
+	            self::$alias_shortcuts[$rs] = array();
+	            self::$alias_shortcuts[$rs]['module'] = $alias['module'];
+	            self::$alias_shortcuts[$rs]['action'] = $alias['action'];
+	            self::$alias_shortcuts[$rs]['url_vars'] = array();
 	            
-	            $this->_next_request->setModule($alias['module']);
-	            $this->_next_request->setAction($alias['action']);
-	            $this->_next_request->setIsAlias(true);
+	            $this->_current_request->setModule($alias['module']);
+	            $this->_current_request->setAction($alias['action']);
+	            $this->_current_request->setIsAlias(true);
+	            
+	            if(isset($alias['params'])){
+                    foreach($alias['params'] as $n => $v){
+                        $this->_current_request->setRequestParameter($n, $v);
+                    }
+                    self::$alias_shortcuts[$rs]['params'] = $alias['params'];
+                }
 	            
 	            foreach($argnames as $i => $n){
-    	            $this->_next_request->setRequestVariable($n, $argvalues[$i]);
-    	            $this->alias_shortcuts[$rs]['url_vars'][$n] = $argvalues[$i];
+    	            $this->_current_request->setRequestParameter($n, $argvalues[$i]);
+    	            self::$alias_shortcuts[$rs]['url_vars'][$n] = $argvalues[$i];
     	        }
-    	        
-    	        break;
+                
+                break;
     	        
 	        }
 	    }
 	    
 	    // if not, then see if the url maps directly onto a module/action
-	    if(!$this->_next_request->isReady()){
+	    if(!$this->_current_request->isReady()){
 	        $u = explode('/', $rs);
 	        if(count($u) < 3){
 	            $module = $u[0];
 	            if(in_array($module, $this->module_shortnames)){
-	                $this->_next_request->setModule($module);
+	                $this->_current_request->setModule($module);
 	                if(isset($u[1])){
-	                    $this->_next_request->setAction($u[1]);
+	                    $this->_current_request->setAction($u[1]);
                     }
                 }else{
                     // default module, default action
-                    $this->_next_request->setModule($this->_default_module_name);
+                    $this->_current_request->setModule($this->_default_module_name);
                 }
             }else{
                 // default module, default action
-                $this->_next_request->setModule($this->_default_module_name);
+                $this->_current_request->setModule($this->_default_module_name);
             }
 	    }
 	    
 	    // Next quickly add any GET and POST variables to the request object
 	    if(count($_GET)){
 	        foreach($_GET as $n => $v){
-	            $this->_next_request->setRequestVariable($n, $v);
+	            $this->_current_request->setRequestParameter($n, $v);
 	        }
 	    }
 	    
 	    if(count($_POST)){
 	        foreach($_POST as $n => $v){
-	            $this->_next_request->setRequestVariable($n, $v);
+	            $this->_current_request->setRequestParameter($n, $v);
 	        }
-	    }
+	    } 
 	    
-	    if($do_action){
+	    $a = new QuinceAction($this->_use_checking);
+	    $a->assignRequest($this->_current_request);
+	    $a->prepareActionObject();
 	    
-	        try{
-	            $result = $this->doAction($this->_next_request);
-	            $this->_next_request->setResult($result);
-	        }catch(QuinceException $e){
-                $this->handleException($e);
-            }
+	    $this->_current_action = $a;
+	    
+	}
+	
+	public function getCurrentRequest(){
+	    return $this->_current_request;
+	}
+	
+	public function dispatch($url='___QUINCE_CURRENT_URL', $prepare=true){
         
+        if($prepare || !$this->_current_action){
+            $this->prepare($url);
+            // echo $this->getCurrentRequest()->getDomain();
+        }
+	    
+	    try{
+            $result = $this->doAction();
+            $this->getCurrentRequest()->setResult($result);
+        }catch(QuinceException $e){
+            $this->handleException($e);
         }
         
-        QuinceUtilities::cacheSet('alias_url_shortcuts', $this->alias_shortcuts);
+        QuinceUtilities::cacheSet('alias_url_shortcuts', self::$alias_shortcuts);
         
-        return $this->_next_request;
+        return $this->_current_request;
 	    
 	}
 	
@@ -880,8 +1570,8 @@ class Quince{
 	public function cleanUp(){
 	    
 	    unset($this->module_shortnames);
-	    unset($this->alias_shortcuts);
-	    unset($this->raw_aliases);
+	    unset(self::$alias_shortcuts);
+	    unset(self::$raw_aliases);
 	    unset($this->_default_module_name);
 	    
 	}
